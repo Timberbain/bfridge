@@ -1,0 +1,30 @@
+web:
+    build: .
+    dockerfile: web.dockerfile
+    ports:
+        - 80:80
+    volumes:
+        - ./web:/web
+        - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+    links:
+        - php
+
+php:
+    build: .
+    dockerfile: php.dockerfile
+    volumes:
+        - ./web:/web
+    links:
+        - db:mysql
+db:
+    build: .
+    dockerfile: db.dockerfile
+    ports:
+        - 3306:3306
+    volumes:
+        - ./db:/var/lib/mysql
+    environment:
+        - MYSQL_ROOT_PASSWORD=denenajs
+        - MYSQL_USER=admin
+        - MYSQL_PASSWORD=password
+        - MYSQL_DATABASE=mybase

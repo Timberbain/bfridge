@@ -1,0 +1,24 @@
+{
+  "name": "bfridge",
+  "version": "1.0.0",
+  "description": "what kind of grocerys do we need?",
+  "main": "app.js",
+  "dependencies": {
+    "angular": "^1.5.8",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-react": "^6.11.1",
+    "jquery": "^3.1.0",
+    "materialize-css": "^0.97.7",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "webpack": "^1.13.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack -d --watch --display-error-details",
+    "build": "webpack -d"
+  },
+  "author": "Jonas Brandvik",
+  "license": "ISC"
+}

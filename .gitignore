@@ -1,0 +1,12 @@
+db/
+web/node_modules/
+web/client/dist/
+
+##############
+# Logfiles
+#############
+*.log
+
+
+
+.DS_Store

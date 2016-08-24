@@ -1,0 +1,48 @@
+/*.brand-logo {
+    padding: 5px !important;
+}*/
+/*.header-icon {
+    height: 54px;
+}*/
+.fridge-item {
+    width: 170px;
+    float: left;
+    margin: 5px;
+}
+.f-icon {
+    float: left;
+    padding-left: 8px;
+    padding-top: 8px;
+    margin: 1px 6px 1px -11px;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+}
+
+.f-chip {
+    width:100%;
+}
+
+.card .card-action {
+    padding: 10px;
+}
+
+.card .card-content .card-title {
+    line-height: 30px;
+    margin-bottom: 10px;
+}
+
+.menu-button {
+    padding: 0 !important;
+}
+.header {
+    font-weight: 300;
+
+    font-size: 3.56rem;
+    line-height: 110%;
+}
+
+.alt_divider {
+    height: 1px;
+    background-color: #e0e0e0;
+}
