@@ -4,6 +4,20 @@
 /*.header-icon {
     height: 54px;
 }*/
+
+.dropdown-button .material-icons {
+    vertical-align: middle;
+    display: inline-flex;
+    line-height: 48px;
+    height: 100%;
+}
+
+.dropdown-button .dropdown-item-name {
+    vertical-align: middle;
+    display: inline-flex;
+    line-height: 48px;
+    height: 100%;
+}
 .fridge-item {
     width: 170px;
     float: left;
@@ -30,6 +44,13 @@
 .card .card-content .card-title {
     line-height: 30px;
     margin-bottom: 10px;
+}
+
+.menu-controls {
+
+}
+.menu-controls .menu-button {
+    display: inline-block;
 }
 
 .menu-button {

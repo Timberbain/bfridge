@@ -77,7 +77,7 @@ function init() {
         constructor(props){
             super(props);
             this.state = {
-                selectedItem: {id: -1, name: "none"},
+                selectedItem: {id: -1, name: ""},
                 items: [
                     {id: 0, name: "Mjölk"},
                     {id: 1, name: "Smör"},
@@ -88,7 +88,24 @@ function init() {
 
         selectItem(item){
             this.setState({selectedItem: item});
+        }
+        resetItem(){
+            this.selectItem({id:-1, name:""});
+        }
 
+        itemDropdown(name){
+            if(name == ""){
+                return <i className="material-icons">keyboard_arrow_down</i>
+            } else {
+                return <i className="material-icons">keyboard_arrow_right</i>
+            }
+        }
+        makeButton(icon, color, callback, enabled){
+            return (
+                <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : function(){}}>
+                    <i className="material-icons">{icon}</i>
+                </a>
+            )
         }
 
         render() {
@@ -96,7 +113,13 @@ function init() {
                 <ul id="slide-out" className="side-nav" style={{transform: 'translateX(-100%)'}}>
                     <li>
                         <div className="center blue-text lighten-1">
-                            Menu
+                            <h5>Menu</h5>
+                        </div>
+                    </li>
+                    <li className="alt_divider center"></li>
+                    <li>
+                        <div className="center blue-text lighten-1">
+                            Add
                             <ul id="available-items" className="dropdown-content">
                                 {this.state.items.map(function(e, i){
                                     return <LeftMenuItem key={"mfid_" + i} itemname={e.name} itemid={e.id} onClick={function(){ this.selectItem(e); }.bind(this)}>{e.name}</LeftMenuItem>
@@ -104,17 +127,22 @@ function init() {
 
                             </ul>
                             <a className="btn dropdown-button white blue-text lighten-1" href="#!" data-activates="available-items">
-                                Select: {this.state.selectedItem.name}
-                                <i className="mdi-navigation-arrow-drop-down right"></i>
+                                {this.itemDropdown(this.state.selectedItem.name)}
+                                <span className="dropdown-item-name">{this.state.selectedItem.name}</span>
+
                             </a>
-                            <div className="adding-controls">
-                                <a className="menu-button btn-floating btn-large waves-effect waves-light green center">
-                                    <i className="material-icons">add</i>
-                                </a>
+                            <div className="menu-controls center">
+                                {this.makeButton("add_shopping_cart", "green", function(){}, true)}
+                                {this.makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
                             </div>
                         </div>
                     </li>
                     <li className="alt_divider center"></li>
+                    <li>
+                        <div className="center blue-text lighten-1">
+                            Create
+                        </div>
+                    </li>
                 </ul>
             )
 
