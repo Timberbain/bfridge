@@ -1,16 +1,28 @@
 import React from 'react'
 
+window.jQuery = require("jquery");
+window.$ = require("jquery");
+require("jquery-validation");
 
+(function(){
+    $(".input-form").validate(
+        {
+            'input-itenm-name': 'required'
+        }
+    );
+})();
 
 export class InputForm extends React.Component {
     render() {
         return (
             <div className="row" style={{'lineHeight': '10px'}}>
-                <div className="input-field col black-text">
-                    <i className="material-icons prefix">text_fields</i>
-                    <input id="icon_prefix" type="text" className="validate" />
-                    <label htmlFor="icon_prefix">Item Name</label>
-                </div>
+                <form className="input-form">
+                    <div className="input-field col black-text">
+                        <i className="material-icons prefix">text_fields</i>
+                        <input id="input-item-name" type="text" className="validate" />
+                        <label htmlFor="input-item-name">Item Name</label>
+                    </div>
+                </form>
 
             </div>
         )
@@ -74,7 +86,7 @@ export class ControlMenu extends React.Component {
                 </li>
                 <li className="alt_divider center"></li>
                 <li>
-                    <div className="container center blue-text lighten-1" style={{'lineHeight': '10px'}}>
+                    <div className="container center blue-text lighten-1">
                         Add
                         <ul id="available-items" className="dropdown-content">
                             {this.state.items.map(function(e, i){

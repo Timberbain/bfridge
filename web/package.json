@@ -9,6 +9,7 @@
     "babel-preset-es2015": "^6.13.2",
     "babel-preset-react": "^6.11.1",
     "jquery": "^3.1.0",
+    "jquery-validation": "^1.15.1",
     "materialize-css": "^0.97.7",
     "react": "^15.3.0",
     "react-dom": "^15.3.0",

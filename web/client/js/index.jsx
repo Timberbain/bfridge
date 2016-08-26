@@ -1,5 +1,6 @@
 window.jQuery = require("jquery");
 window.$ = require("jquery");
+require("jquery-validation");
 require("./materialize.min.js");
 
 // import angular from 'angular';
