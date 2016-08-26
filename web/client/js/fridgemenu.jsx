@@ -2,28 +2,42 @@ import React from 'react'
 
 window.jQuery = require("jquery");
 window.$ = require("jquery");
-require("jquery-validation");
 
-(function(){
-    $(".input-form").validate(
-        {
-            'input-itenm-name': 'required'
-        }
-    );
-})();
+function makeButton(icon, color, callback, enabled){
+    return (
+        <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : function(){}}>
+            <i className="material-icons">{icon}</i>
+        </a>
+    )
+}
+
 
 export class InputForm extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {
+          valid: false
+        };
+    }
     render() {
         return (
             <div className="row" style={{'lineHeight': '10px'}}>
-                <form className="input-form">
+                <form className="input-form" onSubmit={function(){return false;}} method="POST">
                     <div className="input-field col black-text">
                         <i className="material-icons prefix">text_fields</i>
                         <input id="input-item-name" type="text" className="validate" />
                         <label htmlFor="input-item-name">Item Name</label>
                     </div>
+                    <div className="input-field col black-text">
+                        <i className="material-icons prefix">timelapse</i>
+                        <input id="input-item-name" type="text" className="validate" />
+                        <label htmlFor="input-item-name">Expiration (days)</label>
+                    </div>
+                    <div className="menu-controls center">
+                        {makeButton("add", "green", function(){}, true)}
+                        {makeButton("cached", "orange", function(){}, this.state.valid)}
+                    </div>
                 </form>
-
             </div>
         )
     }
@@ -68,13 +82,6 @@ export class ControlMenu extends React.Component {
             return <i className="material-icons">keyboard_arrow_right</i>
         }
     }
-    makeButton(icon, color, callback, enabled){
-        return (
-            <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : function(){}}>
-                <i className="material-icons">{icon}</i>
-            </a>
-        )
-    }
 
     render() {
         return (
@@ -82,6 +89,9 @@ export class ControlMenu extends React.Component {
                 <li>
                     <div className="center blue-text lighten-1">
                         <h5>Menu</h5>
+                        <div className="close-nav blue lighten-1 white-text" onClick={function(){$('.button-collapse').sideNav('hide');}}>
+                          <i className="material-icons">keyboard_arrow_left</i>
+                        </div>
                     </div>
                 </li>
                 <li className="alt_divider center"></li>
@@ -100,8 +110,8 @@ export class ControlMenu extends React.Component {
 
                         </a>
                         <div className="menu-controls center">
-                            {this.makeButton("add_shopping_cart", "green", function(){}, true)}
-                            {this.makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
+                            {makeButton("add_shopping_cart", "green", function(){}, true)}
+                            {makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
                         </div>
                     </div>
                 </li>
