@@ -94,13 +94,13 @@ function init() {
         // }
 
         updateModel( props = {} ){
-            console.log("Updating model", props);
             if( props.action ){
+                console.log(props);
                 this.model.doAction(
                     props.action,
                     props.data || {},
                     this.updateModel.bind(this),
-                    ((e) => {this.updateModel.bind(this)}).bind(this))
+                    ((e) => { this.updateModel(); }).bind(this))
             } else {
                 this.model.queryItems(
                     (() => {this.setState({

@@ -8,7 +8,6 @@ export default class DataAccess {
 	}
 
 	AjaxCall(action, data, success, failure){
-		console.log("ajax");
 		if(success == null){
 			success = (e) => { console.log(e); }
 		}

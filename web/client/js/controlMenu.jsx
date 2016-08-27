@@ -48,7 +48,7 @@ export class TextInput extends React.Component {
                 <input
                     id={this.props.id}
                     type="text"
-                    className={"validate " + this.isValidClass()}
+                    className={"" + this.isValidClass()}
                     onChange={this.validate.bind(this)}
                     onKeyPress={this.validate.bind(this)}
                 />
@@ -75,6 +75,27 @@ export class InputCreateForm extends React.Component {
 
     handleSubmit( e ){
         e.preventDefault();
+    }
+
+    validateName(input){
+        if(!$.inArray(input.toLowerCase(), this.props.data.map((e) => { return e.name.toLowerCase(); }))){
+            return "item already exist";
+        } else {
+            return true;
+        }
+    }
+
+    validateExpiration(input){
+        let pattern = /\d+/g;
+        let test = pattern.exec(input);
+        if(test == null || test != input || !Number.isInteger(input - 0)){
+            return "wrong format";
+        } else {
+            return true;
+        }
+    }
+
+    resetForm(){
 
     }
 
@@ -86,14 +107,15 @@ export class InputCreateForm extends React.Component {
                         id="input-item-name"
                         icon="text_fields"
                         placeholder="Item Name"
-                        validate= {() => { }} />
+                        validate={this.validateName.bind(this)} />
                     <TextInput
                         id="input-item-expiration"
                         icon="timelapse"
-                        placeholder="Expiration (days)" />
+                        placeholder="Expiration (days)"
+                        validate={this.validateExpiration.bind(this)}/>
                     <div className="menu-controls center">
-                        {Util.makeButton("add", "green", function(){}, true)}
-                        {Util.makeButton("cached", "orange", function(){}, this.state.valid)}
+                        {Util.makeButton("add", "green", this.props.create, true /* TODO */)}
+                        {Util.makeButton("cached", "orange", this.resetForm, true /* TODO */)}
                     </div>
                 </form>
             </div>
@@ -141,6 +163,16 @@ export class ControlMenu extends React.Component {
         }
     }
 
+    createItem(name, expiration){
+        this.props.update({
+            action: 'create-new-item',
+            props: {
+                name: name,
+                expiration: expiration
+            }
+        });
+    }
+
     itemDropdown(name){
         if(name == ""){
             return <i className="material-icons">keyboard_arrow_down</i>
@@ -186,7 +218,9 @@ export class ControlMenu extends React.Component {
                     <div className="center blue-text lighten-1">
                         Create
                     </div>
-                    <InputCreateForm></InputCreateForm>
+                    <InputCreateForm
+                        data={this.props.data}
+                        create={this.createItem.bind(this)} />
                 </li>
             </ul>
         )
