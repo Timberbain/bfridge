@@ -3,39 +3,97 @@ import React from 'react'
 window.jQuery = require("jquery");
 window.$ = require("jquery");
 
-function makeButton(icon, color, callback, enabled){
-    return (
+class Util {
+    static makeButton(icon, color, callback, enabled){
+        return (
         <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : function(){}}>
             <i className="material-icons">{icon}</i>
         </a>
-    )
+        )
+    }
 }
 
 
-export class InputForm extends React.Component {
+export class TextInput extends React.Component {
+
+    constructor(props){
+        super(props);
+
+        this.state = {
+            isEmpty: true,
+            valid: false,
+            errorMessage: "invalid",
+        }
+    }
+
+    validate( event ){
+        let value = event.target.value;
+        let error = this.props.validate(value);
+        this.setState({
+            isEmpty: value.length == 0,
+            valid: error === true,
+            errorMessage: error
+        });
+    }
+
+    isValidClass(){
+        return this.state.isEmpty ? "" : (this.state.valid ? "valid" : "invalid");
+    }
+
+
+    render() {
+        return(
+            <div className="input-field col black-text">
+                <i className="material-icons prefix">{this.props.icon}</i>
+                <input
+                    id={this.props.id}
+                    type="text"
+                    className={"validate " + this.isValidClass()}
+                    onChange={this.validate.bind(this)}
+                    onKeyPress={this.validate.bind(this)}
+                />
+                <label data-error={this.state.errorMessage} htmlFor={this.props.id}>{this.props.placeholder}</label>
+            </div>
+        )
+    }
+
+}
+TextInput.defaultProps = {
+    validate: () => { return true; }
+}
+
+
+
+export class InputCreateForm extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-          valid: false
+          validName: false,
+          validExpiration: false
         };
     }
+
+    handleSubmit( e ){
+        e.preventDefault();
+
+    }
+
     render() {
         return (
             <div className="row" style={{'lineHeight': '10px'}}>
                 <form className="input-form" onSubmit={function(){return false;}} method="POST">
-                    <div className="input-field col black-text">
-                        <i className="material-icons prefix">text_fields</i>
-                        <input id="input-item-name" type="text" className="validate" />
-                        <label htmlFor="input-item-name">Item Name</label>
-                    </div>
-                    <div className="input-field col black-text">
-                        <i className="material-icons prefix">timelapse</i>
-                        <input id="input-item-name" type="text" className="validate" />
-                        <label htmlFor="input-item-name">Expiration (days)</label>
-                    </div>
+                    <TextInput
+                        id="input-item-name"
+                        icon="text_fields"
+                        placeholder="Item Name"
+                        validate= {() => { }} />
+                    <TextInput
+                        id="input-item-expiration"
+                        icon="timelapse"
+                        placeholder="Expiration (days)" />
                     <div className="menu-controls center">
-                        {makeButton("add", "green", function(){}, true)}
-                        {makeButton("cached", "orange", function(){}, this.state.valid)}
+                        {Util.makeButton("add", "green", function(){}, true)}
+                        {Util.makeButton("cached", "orange", function(){}, this.state.valid)}
                     </div>
                 </form>
             </div>
@@ -60,11 +118,7 @@ export class ControlMenu extends React.Component {
         super(props);
         this.state = {
             selectedItem: {id: -1, name: ""},
-            items: [
-                {id: 0, name: "Mjölk"},
-                {id: 1, name: "Smör"},
-                {id: 2, name: "Socker"}
-            ],
+            items: [],
         };
     }
 
@@ -73,6 +127,18 @@ export class ControlMenu extends React.Component {
     }
     resetItem(){
         this.selectItem({id:-1, name:""});
+    }
+
+    addSelectedItemToCart(){
+        if(this.state.selectedItem.id != -1){
+            this.props.update({
+                action: 'add-items-to-chart',
+                props: {
+                    id: this.state.selectedItem.id
+                }
+            });
+            this.resetItem();
+        }
     }
 
     itemDropdown(name){
@@ -99,7 +165,7 @@ export class ControlMenu extends React.Component {
                     <div className="container center blue-text lighten-1">
                         Add
                         <ul id="available-items" className="dropdown-content">
-                            {this.state.items.map(function(e, i){
+                            {this.props.data.map(function(e, i){
                                 return <DropDownItem key={"mfid_" + i} itemname={e.name} itemid={e.id} onClick={function(){ this.selectItem(e); }.bind(this)}>{e.name}</DropDownItem>
                             }.bind(this))}
 
@@ -110,8 +176,8 @@ export class ControlMenu extends React.Component {
 
                         </a>
                         <div className="menu-controls center">
-                            {makeButton("add_shopping_cart", "green", function(){}, true)}
-                            {makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
+                            {Util.makeButton("add_shopping_cart", "green", this.addSelectedItemToCart.bind(this), true)}
+                            {Util.makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
                         </div>
                     </div>
                 </li>
@@ -120,7 +186,7 @@ export class ControlMenu extends React.Component {
                     <div className="center blue-text lighten-1">
                         Create
                     </div>
-                    <InputForm></InputForm>
+                    <InputCreateForm></InputCreateForm>
                 </li>
             </ul>
         )

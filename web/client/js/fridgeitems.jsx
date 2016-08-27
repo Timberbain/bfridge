@@ -10,42 +10,49 @@ export class FridgeItems extends React.Component {
         };
     }
 
-
-    //@ Override
-    componentDidMount() {
-        $.ajax(
-            {
-                url: this.props.url,
-                dataType: 'json',
-                async: true,
-                cache: false,
-                action: "POST",
-                data: {
-                    action: 'get-fridge-items'
-                },
-                success: function(result) {
-                    if(result.error){
-                        console.log(result.message);
-                    } else {
-                        this.setState({data: result.data});
-                    }
-                }.bind(this),
-                error: function(xhr, status, err) {
-                    console.log(this.props.url, status, err.toString());
-                }.bind(this)
+    queueItem(id){
+        this.props.update({
+            action: 'queue-item-to-buy',
+            props: {
+                id: id
             }
-        );
+        });
+    }
+
+
+    removeItem(id){
+        this.props.update({
+            action: 'remove-item-from-list',
+            props: {
+                id: id
+            }
+        });
+    }
+
+    buyQueuedItems(){
+        this.props.update({
+            action: 'buy-queued-items',
+            props: {}
+        });
     }
 
     //@ Override
     render() {
-        let items = this.state.data.map(function(e, i){
-            return <FridgeItem key={"fid_" + i} name={e.name} date={e.date} elapsed={e.elapsed} />;
-        });
+        let items = this.props.data;
+        let itemViews = items.map(function(e, i){
+            return <FridgeItem
+                key={"fid_" + i}
+                name={e.name}
+                date={e.date}
+                elapsed={e.elapsed}
+                queueItem={this.queueItem.bind(this)}
+                removeItem={this.removeItem.bind(this)}
+                />;
+        }.bind(this));
 
         return (
             <div className="fridgeItems">
-            {items}
+            {itemViews}
             </div>
         )
     }
@@ -56,11 +63,6 @@ export class FridgeItem extends React.Component {
     //@ Override
     constructor(props){
         super(props);
-        this.bought = this.bought.bind(this);
-    }
-
-    bought () {
-        console.log("This item is bought!");
     }
 
     //@ Override
@@ -84,7 +86,8 @@ export class FridgeItem extends React.Component {
                         {this.props.elapsed}
                     </div>
                     <div className="card-action center">
-                        <a className="waves-effect waves-light btn-floating btn-large green" onClick={this.bought}>
+                        <a className="waves-effect waves-light btn-floating btn-large green"
+                            onClick={(()=>{this.props.queueItem(this.props.id)}).bind(this)}>
                             <i className="material-icons">shopping_cart</i>
                         </a>
                     </div>

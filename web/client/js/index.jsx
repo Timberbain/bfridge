@@ -8,7 +8,9 @@ import React from 'react'
 import {render} from 'react-dom'
 
 import {FridgeItems, FridgeItem} from './fridgeitems'
-import {ControlMenu} from './fridgemenu'
+import {ControlMenu} from './controlMenu'
+
+import FridgeModel from './fridgeModel'
 
 $(document).ready( init );
 
@@ -69,7 +71,45 @@ function init() {
 (function(){
 
 
+
     class Main extends React.Component {
+
+        constructor(props){
+            super(props);
+            this.model = new FridgeModel("dataServer.php");
+            this.state = {
+                model : []
+            }
+
+        }
+
+        componentDidMount() {
+            this.updateModel();
+        }
+
+        // update(){
+        //     this.setState({
+        //         data: this.model.getItems()
+        //     });
+        // }
+
+        updateModel( props = {} ){
+            console.log("Updating model", props);
+            if( props.action ){
+                this.model.doAction(
+                    props.action,
+                    props.data || {},
+                    this.updateModel.bind(this),
+                    ((e) => {this.updateModel.bind(this)}).bind(this))
+            } else {
+                this.model.queryItems(
+                    (() => {this.setState({
+                        model: this.model.getItems()
+                    })}).bind(this)
+                );
+            }
+        }
+
         render() {
             return (
                 <div>
@@ -83,8 +123,8 @@ function init() {
                             </a>
                         </div>
                     </nav>
-                    <ControlMenu url={this.props.url}></ControlMenu>
-                    <FridgeItems url={this.props.url}/>
+                    <ControlMenu data={this.state.model} update={this.updateModel.bind(this)} />
+                    <FridgeItems data={this.state.model} update={this.updateModel.bind(this)} />
                 </div>
             )
         }
@@ -92,5 +132,5 @@ function init() {
 
 
 
-    render(<Main url="dataServer.php"/>, $("#fridge").get(0));
+    render(<Main/>, $("#fridge").get(0));
 })();
