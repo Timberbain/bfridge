@@ -6,7 +6,7 @@ window.$ = require("jquery");
 class Util {
     static makeButton(icon, color, callback, enabled){
         return (
-        <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : function(){}}>
+        <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : (()=>{})}>
             <i className="material-icons">{icon}</i>
         </a>
         )
@@ -16,30 +16,9 @@ class Util {
 
 export class TextInput extends React.Component {
 
-    constructor(props){
-        super(props);
-
-        this.state = {
-            isEmpty: true,
-            valid: false,
-            errorMessage: "invalid",
-        }
-    }
-
-    validate( event ){
-        let value = event.target.value;
-        let error = this.props.validate(value);
-        this.setState({
-            isEmpty: value.length == 0,
-            valid: error === true,
-            errorMessage: error
-        });
-    }
-
     isValidClass(){
-        return this.state.isEmpty ? "" : (this.state.valid ? "valid" : "invalid");
+        return this.props.value.length == 0 ? "" : (this.props.error == "" ? "valid" : "invalid");
     }
-
 
     render() {
         return(
@@ -49,73 +28,108 @@ export class TextInput extends React.Component {
                     id={this.props.id}
                     type="text"
                     className={"" + this.isValidClass()}
-                    onChange={this.validate.bind(this)}
-                    onKeyPress={this.validate.bind(this)}
+                    onChange={this.props.onChange}
+                    onKeyPress={this.props.onChange}
+                    value={this.props.value}
                 />
-                <label data-error={this.state.errorMessage} htmlFor={this.props.id}>{this.props.placeholder}</label>
+                <label data-error={this.props.error} htmlFor={this.props.id}>{this.props.placeholder}</label>
             </div>
         )
     }
 
 }
-TextInput.defaultProps = {
-    validate: () => { return true; }
-}
-
 
 
 export class InputCreateForm extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-          validName: false,
-          validExpiration: false
+            newName: "",
+            errorName: "",
+            newExpiration: "",
+            errorExpiration: ""
         };
     }
 
-    handleSubmit( e ){
-        e.preventDefault();
-    }
+    validateName(event){
+        let input = event.target.value;
 
-    validateName(input){
-        if(!$.inArray(input.toLowerCase(), this.props.data.map((e) => { return e.name.toLowerCase(); }))){
-            return "item already exist";
-        } else {
-            return true;
+        let pattern = /[0-9a-öA-Ö\s\-\_]+/g;
+        let test = pattern.exec(input);
+        let error = "";
+        if(test == null || test != input){
+            error = "dont use special characters";
+        } else if($.inArray(input.toLowerCase(), this.props.data.map((e) => { return e.name.toLowerCase(); })) != -1 ){
+            error = "item already exist";
         }
+        this.setState({
+            errorName: error,
+            newName: input
+        });
     }
 
-    validateExpiration(input){
+    validateExpiration(event){
+        let input = event.target.value;
+
         let pattern = /\d+/g;
         let test = pattern.exec(input);
+        let error = "";
         if(test == null || test != input || !Number.isInteger(input - 0)){
-            return "wrong format";
-        } else {
-            return true;
+            error = "wrong format";
         }
+        this.setState({
+            errorExpiration: error,
+            newExpiration: input
+        });
     }
 
     resetForm(){
+        this.setState({
+            newName: "",
+            errorName: "",
+            newExpiration: "",
+            errorExpiration: ""
+        });
+    }
 
+    submitForm(){
+        if(this.state.errorName == "" &&
+            this.state.newName.length > 0 &&
+            this.state.errorExpiration == "" &&
+            this.state.newExpiration.length > 0 ){
+
+            this.props.createItem(this.state.newName, this.state.newExpiration);
+            this.resetForm();
+        }
+    }
+    canReset(){
+        return this.state.newName != "" || this.state.newExpiration != "";
+    }
+    canSubmit(){
+        return this.state.newName != "" && this.state.newExpiration != "";
     }
 
     render() {
         return (
             <div className="row" style={{'lineHeight': '10px'}}>
-                <form className="input-form" onSubmit={function(){return false;}} method="POST">
+                <form className="input-form" onSubmit={() => {return false;}} method="POST">
                     <TextInput
                         id="input-item-name"
                         icon="text_fields"
                         placeholder="Item Name"
-                        validate={this.validateName.bind(this)} />
+                        onChange={this.validateName.bind(this)}
+                        error={this.state.errorName}
+                        value={this.state.newName}/>
                     <TextInput
                         id="input-item-expiration"
                         icon="timelapse"
                         placeholder="Expiration (days)"
-                        validate={this.validateExpiration.bind(this)}/>
+                        onChange={this.validateExpiration.bind(this)}
+                        error={this.state.errorExpiration}
+                        value={this.state.newExpiration}/>
                     <div className="menu-controls col s12 center">
-                        {Util.makeButton("add", "green", this.props.create, true /* TODO */)}
-                        {Util.makeButton("cached", "orange", this.resetForm, true /* TODO */)}
+                        {Util.makeButton("add", "green", this.submitForm.bind(this), this.canSubmit() )}
+                        {Util.makeButton("cached", "orange", this.resetForm.bind(this), this.canReset() )}
                     </div>
                 </form>
             </div>
@@ -133,34 +147,73 @@ export class DropDownItem extends React.Component {
 }
 
 
-/* Navigation bar on the left side */
-export class ControlMenu extends React.Component {
-    //@ Override
+export class InputAddForm extends React.Component {
     constructor(props){
         super(props);
+
         this.state = {
             selectedItem: {id: -1, name: ""},
             items: [],
         };
     }
-
     selectItem(item){
         this.setState({selectedItem: item});
+    }
+    addItem(){
+        if(this.state.selectedItem.id != undefined && this.state.selectedItem.id != -1){
+            console.log(this.state.selectedItem);
+            this.props.addItem( this.state.selectedItem.id );
+            this.resetItem();
+        }
     }
     resetItem(){
         this.selectItem({id:-1, name:""});
     }
 
-    addSelectedItemToCart(){
-        if(this.state.selectedItem.id != -1){
-            this.props.update({
-                action: 'add-items-to-chart',
-                props: {
-                    id: this.state.selectedItem.id
-                }
-            });
-            this.resetItem();
+    itemDropdown(name){
+        if(name == ""){
+            return <i className="material-icons">keyboard_arrow_down</i>
+        } else {
+            return <i className="material-icons">keyboard_arrow_right</i>
         }
+    }
+
+    render() {
+        return (
+            <div className="row" style={{'lineHeight': '10px'}}>
+                <ul id="available-items" className="dropdown-content col s11">
+                    {this.props.data.map(((e, i) =>{
+                        return <DropDownItem key={"mfid_" + i} itemname={e.name} itemid={e.id} onClick={(() => { this.selectItem(e); }).bind(this)}>{e.name}</DropDownItem>
+                    }).bind(this))}
+
+                </ul>
+                <a className=" col s11 btn dropdown-button white blue-text lighten-1" href="#!" data-activates="available-items">
+                    {this.itemDropdown(this.state.selectedItem.name)}
+                    <span className="dropdown-item-name">{this.state.selectedItem.name}</span>
+
+                </a>
+                <div className="menu-controls center col s11">
+                    {Util.makeButton("add_shopping_cart", "green", this.addItem.bind(this), this.state.selectedItem.id != -1)}
+                    {Util.makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
+                </div>
+            </div>
+        )
+    }
+
+
+}
+
+
+/* Navigation bar on the left side */
+export class ControlMenu extends React.Component {
+
+    addSelectedItemToCart(id){
+        this.props.update({
+            action: 'add-items-to-chart',
+            props: {
+                id: id
+            }
+        });
     }
 
     createItem(name, expiration){
@@ -171,14 +224,6 @@ export class ControlMenu extends React.Component {
                 expiration: expiration
             }
         });
-    }
-
-    itemDropdown(name){
-        if(name == ""){
-            return <i className="material-icons">keyboard_arrow_down</i>
-        } else {
-            return <i className="material-icons">keyboard_arrow_right</i>
-        }
     }
 
     render() {
@@ -195,35 +240,22 @@ export class ControlMenu extends React.Component {
                 <li className="alt_divider center"></li>
                 <li>
                     <div className="container center blue-text lighten-1">
-                        Add
-                        <ul id="available-items" className="dropdown-content">
-                            {this.props.data.map(function(e, i){
-                                return <DropDownItem key={"mfid_" + i} itemname={e.name} itemid={e.id} onClick={function(){ this.selectItem(e); }.bind(this)}>{e.name}</DropDownItem>
-                            }.bind(this))}
-
-                        </ul>
-                        <a className="btn dropdown-button white blue-text lighten-1" href="#!" data-activates="available-items">
-                            {this.itemDropdown(this.state.selectedItem.name)}
-                            <span className="dropdown-item-name">{this.state.selectedItem.name}</span>
-
-                        </a>
-                        <div className="menu-controls center">
-                            {Util.makeButton("add_shopping_cart", "green", this.addSelectedItemToCart.bind(this), true)}
-                            {Util.makeButton("cached", "orange", this.resetItem.bind(this), this.state.selectedItem.id != -1)}
-                        </div>
+                        Add Item
                     </div>
+                    <InputAddForm
+                        data={this.props.data}
+                        addItem={this.addSelectedItemToCart.bind(this)} />
                 </li>
                 <li className="alt_divider center"></li>
                 <li>
                     <div className="center blue-text lighten-1">
-                        Create
+                        Create Item
                     </div>
                     <InputCreateForm
                         data={this.props.data}
-                        create={this.createItem.bind(this)} />
+                        createItem={this.createItem.bind(this)} />
                 </li>
             </ul>
         )
-
     }
 }
