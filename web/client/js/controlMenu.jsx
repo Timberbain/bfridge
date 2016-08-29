@@ -43,7 +43,7 @@ export class TextInput extends React.Component {
 
     render() {
         return(
-            <div className="input-field col black-text">
+            <div className="input-field col s11 black-text">
                 <i className="material-icons prefix">{this.props.icon}</i>
                 <input
                     id={this.props.id}
@@ -113,7 +113,7 @@ export class InputCreateForm extends React.Component {
                         icon="timelapse"
                         placeholder="Expiration (days)"
                         validate={this.validateExpiration.bind(this)}/>
-                    <div className="menu-controls center">
+                    <div className="menu-controls col s12 center">
                         {Util.makeButton("add", "green", this.props.create, true /* TODO */)}
                         {Util.makeButton("cached", "orange", this.resetForm, true /* TODO */)}
                     </div>
