@@ -6,26 +6,44 @@ import DataAccess from "./dataAccess"
 export default class FridgeModel {
     constructor(url){
         this.dataAccess = new DataAccess(url);
-        this.dataModel = [];
+        this.queued = [];
+        this.items = [];
     }
 
-    queryItems( callback ){
-        let action = "get-fridge-items";
-        let data = [];
-        let success = ((response) => { this.dataModel = response['data']; callback(); }).bind(this);
-        // let success = function(response){
-        //     this.dataModel = response['data'];
-        // }.bind(this);
-        let failure = (response) => { console.log(response); };
-        this.dataAccess.AjaxCall(action, data, success, failure);
+    update ( callback ){
+        let action = "get-charted-fridge-items";
+        let failure = (response) => { console.log(response, response.responseText); };
+
+        this.dataAccess.AjaxCall(
+            "get-available-fridge-items",
+            [],
+            function( response ){
+                if(typeof response['data'] == 'object'){
+                    this.items = response['data'];
+                }
+                this.dataAccess.AjaxCall(
+                    "get-charted-fridge-items",
+                    [],
+                    function(response){
+                        if(typeof response['data'] == 'object'){
+                            this.queued = response['data'];
+                        }
+                        callback();
+                    }.bind(this),
+                    failure
+                );
+            }.bind(this),
+            failure
+        );
     }
 
     doAction( action, data, success, failure ){
         this.dataAccess.AjaxCall(action, data, success, failure );
     }
-
     getItems(){
-        //console.log(this);
-        return this.dataModel;
+        return this.items;
+    }
+    getQueued(){
+        return this.queued;
     }
 }

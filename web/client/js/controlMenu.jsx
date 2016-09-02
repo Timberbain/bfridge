@@ -210,7 +210,7 @@ export class ControlMenu extends React.Component {
     addSelectedItemToCart(id){
         this.props.update({
             action: 'add-items-to-chart',
-            props: {
+            data: {
                 id: id
             }
         });
@@ -218,8 +218,8 @@ export class ControlMenu extends React.Component {
 
     createItem(name, expiration){
         this.props.update({
-            action: 'create-new-item',
-            props: {
+            action: 'create-fridge-item',
+            data: {
                 name: name,
                 expiration: expiration
             }

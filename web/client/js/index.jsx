@@ -78,7 +78,8 @@ function init() {
             super(props);
             this.model = new FridgeModel("dataServer.php");
             this.state = {
-                model : []
+                items : [],
+                queued: []
             }
 
         }
@@ -102,9 +103,10 @@ function init() {
                     this.updateModel.bind(this),
                     ((e) => { this.updateModel(); }).bind(this))
             } else {
-                this.model.queryItems(
+                this.model.update(
                     (() => {this.setState({
-                        model: this.model.getItems()
+                        items: this.model.getItems(),
+                        queued: this.model.getQueued()
                     })}).bind(this)
                 );
             }
@@ -123,8 +125,8 @@ function init() {
                             </a>
                         </div>
                     </nav>
-                    <ControlMenu data={this.state.model} update={this.updateModel.bind(this)} />
-                    <FridgeItems data={this.state.model} update={this.updateModel.bind(this)} />
+                    <ControlMenu data={this.state.items} update={this.updateModel.bind(this)} />
+                    <FridgeItems data={this.state.queued} update={this.updateModel.bind(this)} />
                 </div>
             )
         }

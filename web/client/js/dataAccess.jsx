@@ -14,6 +14,7 @@ export default class DataAccess {
 		if(failure == null){
 			failure = (e) => { console.log(e['responseText']); }
 		}
+        // console.log({'action': action, 'data': data}, this.serverurl);
 		$.ajax({
 			url: this.serverurl,
 			type: 'POST',
