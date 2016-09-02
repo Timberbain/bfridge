@@ -23,8 +23,9 @@ db:
         - 3306:3306
     volumes:
         - ./db:/var/lib/mysql
+        - ./config/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
         - MYSQL_ROOT_PASSWORD=denenajs
         - MYSQL_USER=admin
         - MYSQL_PASSWORD=password
-        - MYSQL_DATABASE=mybase
+        - MYSQL_DATABASE=default
