@@ -1,13 +1,9 @@
 <?
-
-    phpinfo();
-    die();
-
     header("Content-Type: text/plain");
 
 
 
-    $link = mysqli_connect("mysql", "root", "denenajs");
+    $link = mysqli_connect("mysql", "fridgemaster", "inafridge");
 
 
     if(!$link){

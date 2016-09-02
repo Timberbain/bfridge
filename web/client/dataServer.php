@@ -26,7 +26,7 @@
     function connect(){
         /* Connect to the database */
         global $connection;
-        $connection = mysqli_connect("mysql", "admin", "password", "bfridged");
+        $connection = mysqli_connect("mysql", "fridgemaster", "inafridge", "bfridged");
         if(!$connection){
             return "Unable to connect to database.";
         }

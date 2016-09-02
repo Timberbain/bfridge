@@ -26,6 +26,6 @@ db:
         - ./config/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
         - MYSQL_ROOT_PASSWORD=denenajs
-        - MYSQL_USER=admin
-        - MYSQL_PASSWORD=password
-        - MYSQL_DATABASE=default
+        - MYSQL_USER=fridgemaster
+        - MYSQL_PASSWORD=inafridge
+        - MYSQL_DATABASE=bfridged
