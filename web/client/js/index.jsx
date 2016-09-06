@@ -96,12 +96,12 @@ function init() {
 
         updateModel( props = {} ){
             if( props.action ){
-                console.log(props);
+                // console.log(props);
                 this.model.doAction(
                     props.action,
                     props.data || {},
-                    this.updateModel.bind(this),
-                    ((e) => { this.updateModel(); }).bind(this))
+                    ((e) => { console.log(e); this.updateModel(); }).bind(this),
+                    ((e) => { console.log(e); this.updateModel(); }).bind(this))
             } else {
                 this.model.update(
                     (() => {this.setState({

@@ -2,12 +2,14 @@
 
     header('Content-Type: application/json');
 
+    date_default_timezone_set("Europe/Stockholm");
     $connection;
 
     /* Handle requests */
 
     $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : "";
     $data = isset($_REQUEST['data']) ? $_REQUEST['data'] : array();
+    // output($action);
     switch($action){
         case "get-charted-fridge-items":
             connect();
@@ -21,6 +23,14 @@
         case "add-items-to-chart":
             connect();
             output( add_fridge_item_to_chart($data) );
+        case "add-item-to-buy-queue":
+            connect();
+            output( add_item_to_buy_queue($data) );
+        case "buy-all-queued-items":
+            connect();
+            output( buy_all_queued_items() );
+        default:
+            output("No action called: $action");
     }
 
     function connect(){
@@ -36,6 +46,80 @@
         $connection->set_charset('utf8');
     }
 
+    function queue_item($hid){
+        return change_item_state($hid, "queued");
+    }
+    function unqueue_item($hid){
+        return change_item_state($hid, "charted");
+    }
+    function close_item($hid){
+        return change_item_state($hid, "closed");
+    }
+    function open_item($hid){
+        return change_item_state($hid, "queued");
+    }
+
+    function change_item_state($hid, $state){
+        global $connection;
+        $item = get_fridge_history_item($hid);
+        if($item === false) return "Item not found";
+        $queued = "null";
+        $closed = "null";
+        switch($state){
+            case "charted":
+                /* already set to null */
+                break;
+            case "queued":
+                $queued = "'".now()."'";
+                break;
+            case "closed":
+                if($item['queued'] == null){
+                    $queued = "'".now()."'";
+                }
+                $closed = "'".now()."'";
+                break;
+        }
+        $query = "UPDATE fridge_items_history SET queued=$queued, closed=$closed WHERE hid=$hid";
+
+        if(!$connection->query($query)){
+            return "Unable to update state of item";
+        }
+
+    }
+
+    function add_item_to_buy_queue($data){
+        global $connection;
+        if( !isset($data['hid']) ){
+            return "Item id is not set";
+        }
+
+        $id = $data['hid'];
+        $id = $connection->escape_string($id);
+
+        if(fridge_item_exists_in_chart($id)){
+            return queue_item($id);
+        }
+        return "Item does now exist in chart";
+    }
+
+    function buy_all_queued_items(){
+        global $connection;
+
+        $query = "SELECT * FROM fridge_items_history where queued is not null";
+        if(!$result = $connection->query($query)){
+            return "Unable to fetch queued items";
+        }
+        $hids = array();
+        while($row = $result->fetch_assoc()){
+            $hids[] = $row['hid'];
+        }
+        $hid_str = implode(",", $hids);
+        $query = "UPDATE fridge_items_history where hid in ($hid_str)";
+        if(!$connection->query($query)){
+            return "Unable to buy queued items";
+        }
+    }
+
     function add_fridge_item_to_chart($data){
         global $connection;
 
@@ -46,11 +130,11 @@
         $id = $data['id'];
         $id = $connection->escape_string($id);
         if(is_valid_fridge_id($id)){
-            $timestamp = date('Y-m-d H:i:s');
+            $timestamp = now();
 
-            // State = queued, checkout, closed
-            $query = "INSERT INTO fridge_items_history (fid, timestamp, state, userid)
-                        VALUES ($id, '$timestamp', 'queued', 0)";
+            // State = charted, queued, closed
+            $query = "INSERT INTO fridge_items_history (fid, charted, queued, closed, userid)
+                        VALUES ($id, '$timestamp', null, null, 0)";
             $result = $connection->query($query);
             return $result;
         }
@@ -79,6 +163,13 @@
         return "invalid input";
 
     }
+    function get_fridge_history_item($hid){
+        global $connection;
+        $query = "SELECT * FROM fridge_items_history WHERE hid=$hid";
+        $result = $connection->query($query);
+        return $result->fetch_assoc();
+
+    }
     function get_available_fridge_items(){
         global $connection;
         $query = "SELECT id, name, expiration from fridge_items";
@@ -94,17 +185,20 @@
     function get_charted_fridge_items(){
 
         global $connection;
-        $query = "SELECT fi.id, fi.name, fi.expiration, fih.timestamp, fih.state
+        $query = "SELECT fih.hid, fi.id as fid, fi.name, fi.expiration, fih.charted, fih.queued
             FROM fridge_items fi, fridge_items_history fih
-            WHERE fi.id = fih.fid";
+            WHERE fi.id = fih.fid
+            AND fih.queued is null
+            AND fih.closed is null";
         $result = $connection->query($query);
         $data = array();
         while($row = $result->fetch_assoc()){
-            $elapsed = (time() - strtotime($row['timestamp'])) / 60 / 60 / 24;
+            $elapsed = (time() - strtotime($row['charted'])) / 60 / 60 / 24;
             $data[] = array(
-                "id" => $row['id'],
+                "hid" => $row['hid'],
+                "fid" => $row['fid'],
                 "name" => $row['name'],
-                "date" => substr($row['timestamp'], 0, 10),
+                "date" => substr($row['charted'], 0, 10),
                 "elapsed" => floor($elapsed),
                 "expiration" => $row['expiration'],
                 "expired" => $elapsed - $row['expiration']
@@ -130,6 +224,22 @@
         return true;
     }
 
+    function fridge_item_exists_in_chart($hid){
+        global $connection;
+        $query = "SELECT hid
+            FROM fridge_items_history
+            WHERE hid=$hid
+            AND queued is null
+            AND closed is null";
+
+        $result = $connection->query($query);
+        $rows = $result->num_rows;
+        return $rows > 0;
+    }
+
+    function now(){
+        return date('Y-m-d H:i:s');
+    }
     function output($data, $utf8_encode = false){
         $outp = array(
             "error" => 0,

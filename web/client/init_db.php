@@ -47,11 +47,12 @@
 
 
     $query = "CREATE TABLE IF NOT EXISTS fridge_items_history(
+        hid INT(4) NOT NULL PRIMARY KEY AUTO_INCREMENT,
         fid INT(4) NOT NULL,
-        timestamp DATETIME NOT NULL,
-        state varchar(20),
-        userid INT(4),
-        PRIMARY KEY (fid, timestamp))";
+        charted DATETIME NOT NULL,
+        queued DATETIME,
+        closed DATETIME,
+        userid INT(4))";
 
     if(!$link->query($query)){
         close($link, "Error creating table: " . $link->error);

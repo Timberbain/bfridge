@@ -10,29 +10,29 @@ export class FridgeItems extends React.Component {
         };
     }
 
-    queueItem(id){
+    queueItem(hid){
         this.props.update({
-            action: 'queue-item-to-buy',
-            props: {
-                id: id
+            action: 'add-item-to-buy-queue',
+            data: {
+                hid: hid
             }
         });
     }
 
 
-    removeItem(id){
+    unqueueItem(id){
         this.props.update({
-            action: 'remove-item-from-list',
-            props: {
-                id: id
+            action: 'remove-item-from-buy-queue',
+            data: {
+                hid: hid
             }
         });
     }
 
     buyQueuedItems(){
         this.props.update({
-            action: 'buy-queued-items',
-            props: {}
+            action: 'buy-all-queued-items',
+            data: {}
         });
     }
 
@@ -41,12 +41,13 @@ export class FridgeItems extends React.Component {
         let items = this.props.data;
         let itemViews = items.map(function(e, i){
             return <FridgeItem
-                key={"fid_" + i}
+                key={"hid_" + i}
+                hid={e.hid}
                 name={e.name}
                 date={e.date}
                 elapsed={e.elapsed}
                 queueItem={this.queueItem.bind(this)}
-                removeItem={this.removeItem.bind(this)}
+                unqueueItem={this.unqueueItem.bind(this)}
                 />;
         }.bind(this));
 
@@ -87,7 +88,7 @@ export class FridgeItem extends React.Component {
                     </div>
                     <div className="card-action center">
                         <a className="waves-effect waves-light btn-floating btn-large green"
-                            onClick={(()=>{this.props.queueItem(this.props.id)}).bind(this)}>
+                            onClick={(()=>{this.props.queueItem(this.props.hid)}).bind(this)}>
                             <i className="material-icons">shopping_cart</i>
                         </a>
                     </div>

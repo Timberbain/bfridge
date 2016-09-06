@@ -21,6 +21,7 @@ export default class FridgeModel {
                 if(typeof response['data'] == 'object'){
                     this.items = response['data'];
                 }
+                // console.log(response);
                 this.dataAccess.AjaxCall(
                     "get-charted-fridge-items",
                     [],
@@ -28,6 +29,7 @@ export default class FridgeModel {
                         if(typeof response['data'] == 'object'){
                             this.queued = response['data'];
                         }
+                        // console.log(response);
                         callback();
                     }.bind(this),
                     failure
@@ -38,6 +40,7 @@ export default class FridgeModel {
     }
 
     doAction( action, data, success, failure ){
+        console.log(action, data);
         this.dataAccess.AjaxCall(action, data, success, failure );
     }
     getItems(){
