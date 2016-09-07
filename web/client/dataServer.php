@@ -11,21 +11,27 @@
     $data = isset($_REQUEST['data']) ? $_REQUEST['data'] : array();
     // output($action);
     switch($action){
-        case "get-charted-fridge-items":
+        case "get-carted-and-queued-fridge-items":
             connect();
-            output( get_charted_fridge_items() );
+            output( get_carted_and_queued_fridge_items() );
         case "get-available-fridge-items":
             connect();
             output( get_available_fridge_items() );
         case "create-fridge-item":
             connect();
             output( create_new_fridge_item($data) );
-        case "add-items-to-chart":
+        case "remove-item-from-cart":
             connect();
-            output( add_fridge_item_to_chart($data) );
+            output( remove_fridge_item_from_cart($data) );
+        case "add-items-to-cart":
+            connect();
+            output( add_fridge_item_to_cart($data) );
         case "add-item-to-buy-queue":
             connect();
             output( add_item_to_buy_queue($data) );
+        case "remove-item-from-buy-queue":
+            connect();
+            output( remove_item_from_buy_queue($data) );
         case "buy-all-queued-items":
             connect();
             output( buy_all_queued_items() );
@@ -50,7 +56,7 @@
         return change_item_state($hid, "queued");
     }
     function unqueue_item($hid){
-        return change_item_state($hid, "charted");
+        return change_item_state($hid, "carted");
     }
     function close_item($hid){
         return change_item_state($hid, "closed");
@@ -66,7 +72,7 @@
         $queued = "null";
         $closed = "null";
         switch($state){
-            case "charted":
+            case "carted":
                 /* already set to null */
                 break;
             case "queued":
@@ -87,7 +93,7 @@
 
     }
 
-    function add_item_to_buy_queue($data){
+    function handle_item_buy_queue($data, $add){
         global $connection;
         if( !isset($data['hid']) ){
             return "Item id is not set";
@@ -96,10 +102,24 @@
         $id = $data['hid'];
         $id = $connection->escape_string($id);
 
-        if(fridge_item_exists_in_chart($id)){
-            return queue_item($id);
+        if(fridge_item_exists_in_cart($id)){
+            if($add){
+                return queue_item($id);
+            } else {
+                return unqueue_item($id);
+            }
         }
-        return "Item does now exist in chart";
+        return "Item does now exist in cart";
+    }
+
+
+
+    function add_item_to_buy_queue($data){
+        return handle_item_buy_queue($data, true);
+    }
+
+    function remove_item_from_buy_queue($data){
+        return handle_item_buy_queue($data, false);
     }
 
     function buy_all_queued_items(){
@@ -120,7 +140,7 @@
         }
     }
 
-    function add_fridge_item_to_chart($data){
+    function add_fridge_item_to_cart($data){
         global $connection;
 
         if( !isset($data['id']) ){
@@ -130,17 +150,37 @@
         $id = $data['id'];
         $id = $connection->escape_string($id);
         if(is_valid_fridge_id($id)){
+
             $timestamp = now();
 
-            // State = charted, queued, closed
-            $query = "INSERT INTO fridge_items_history (fid, charted, queued, closed, userid)
+            // State = carted, queued, closed
+            $query = "INSERT INTO fridge_items_history (fid, carted, queued, closed, userid)
                         VALUES ($id, '$timestamp', null, null, 0)";
             $result = $connection->query($query);
             return $result;
         }
         return "invalid input";
-
     }
+
+    function remove_fridge_item_from_cart($data){
+        global $connection;
+
+        if( !isset($data['hid']) ){
+            return 0;
+        }
+
+        $hid = $data['hid'];
+        $hid = $connection->escape_string($hid);
+        if(fridge_item_exists_in_cart($hid)){
+            $query = "DELETE FROM fridge_items_history WHERE hid=$hid";
+            $result = $connection->query($query);
+            return $result;
+        }
+        return "invalid input";
+    }
+
+
+
 
     function create_new_fridge_item($data){
         global $connection;
@@ -182,23 +222,23 @@
     }
 
 
-    function get_charted_fridge_items(){
+    function get_carted_and_queued_fridge_items(){
 
         global $connection;
-        $query = "SELECT fih.hid, fi.id as fid, fi.name, fi.expiration, fih.charted, fih.queued
+        $query = "SELECT fih.hid, fi.id as fid, fi.name, fi.expiration, fih.carted, fih.queued
             FROM fridge_items fi, fridge_items_history fih
             WHERE fi.id = fih.fid
-            AND fih.queued is null
             AND fih.closed is null";
         $result = $connection->query($query);
         $data = array();
         while($row = $result->fetch_assoc()){
-            $elapsed = (time() - strtotime($row['charted'])) / 60 / 60 / 24;
+            $elapsed = (time() - strtotime($row['carted'])) / 60 / 60 / 24;
             $data[] = array(
                 "hid" => $row['hid'],
                 "fid" => $row['fid'],
                 "name" => $row['name'],
-                "date" => substr($row['charted'], 0, 10),
+                "date" => substr($row['carted'], 0, 10),
+                "queued" => $row['queued'] != null,
                 "elapsed" => floor($elapsed),
                 "expiration" => $row['expiration'],
                 "expired" => $elapsed - $row['expiration']
@@ -224,12 +264,11 @@
         return true;
     }
 
-    function fridge_item_exists_in_chart($hid){
+    function fridge_item_exists_in_cart($hid){
         global $connection;
         $query = "SELECT hid
             FROM fridge_items_history
             WHERE hid=$hid
-            AND queued is null
             AND closed is null";
 
         $result = $connection->query($query);

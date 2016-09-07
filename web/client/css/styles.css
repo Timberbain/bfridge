@@ -1,3 +1,14 @@
+.small-margin{
+    margin: 4px;
+}
+
+.card .no-border {
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+    border-left: 0;
+}
+
 .close-nav {
   position: absolute;
   top: 0;
@@ -90,11 +101,17 @@
 .menu-button {
     padding: 0 !important;
 }
+
 .header {
     font-weight: 300;
 
     font-size: 3.56rem;
     line-height: 110%;
+}
+
+.header-icon {
+    width: 56px;
+    margin: 4px;
 }
 
 .alt_divider {

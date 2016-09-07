@@ -49,7 +49,7 @@
     $query = "CREATE TABLE IF NOT EXISTS fridge_items_history(
         hid INT(4) NOT NULL PRIMARY KEY AUTO_INCREMENT,
         fid INT(4) NOT NULL,
-        charted DATETIME NOT NULL,
+        carted DATETIME NOT NULL,
         queued DATETIME,
         closed DATETIME,
         userid INT(4))";

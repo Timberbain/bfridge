@@ -79,7 +79,7 @@ function init() {
             this.model = new FridgeModel("dataServer.php");
             this.state = {
                 items : [],
-                queued: []
+                carted: []
             }
 
         }
@@ -88,11 +88,13 @@ function init() {
             this.updateModel();
         }
 
-        // update(){
-        //     this.setState({
-        //         data: this.model.getItems()
-        //     });
-        // }
+        buyQueuedItems(){
+            this.updateModel({
+                action: 'buy-all-queued-items',
+                data: {}
+            });
+        }
+
 
         updateModel( props = {} ){
             if( props.action ){
@@ -106,7 +108,7 @@ function init() {
                 this.model.update(
                     (() => {this.setState({
                         items: this.model.getItems(),
-                        queued: this.model.getQueued()
+                        carted: this.model.getCarted()
                     })}).bind(this)
                 );
             }
@@ -117,7 +119,13 @@ function init() {
                 <div>
                     <nav className="blue lighten-1">
                         <div className="nav-wrapper container">
-                            <a className="right brand-logo" href="#">
+
+                            <a className={"right " + (this.model.hasQueued() ? "waves-effect waves-light" : "disabled") + " btn-floating btn-large yellow small-margin"}
+                                onClick={this.buyQueuedItems.bind(this)}>
+                                <i className="material-icons">monetization_on</i>
+                            </a>
+
+                            <a className="center brand-logo" href="#">
                                 <img className="header-icon responsive-img" src="images/bfridge_icon.png" />
                             </a>
                             <a href="#" data-activates="slide-out" className="button-collapse show-on-large">
@@ -126,7 +134,7 @@ function init() {
                         </div>
                     </nav>
                     <ControlMenu data={this.state.items} update={this.updateModel.bind(this)} />
-                    <FridgeItems data={this.state.queued} update={this.updateModel.bind(this)} />
+                    <FridgeItems data={this.state.carted} update={this.updateModel.bind(this)} />
                 </div>
             )
         }

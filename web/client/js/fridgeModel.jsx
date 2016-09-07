@@ -6,12 +6,12 @@ import DataAccess from "./dataAccess"
 export default class FridgeModel {
     constructor(url){
         this.dataAccess = new DataAccess(url);
-        this.queued = [];
+        this.carted = [];
         this.items = [];
     }
 
     update ( callback ){
-        let action = "get-charted-fridge-items";
+        let action = "get-carted-and-queued-fridge-items";
         let failure = (response) => { console.log(response, response.responseText); };
 
         this.dataAccess.AjaxCall(
@@ -23,11 +23,11 @@ export default class FridgeModel {
                 }
                 // console.log(response);
                 this.dataAccess.AjaxCall(
-                    "get-charted-fridge-items",
+                    "get-carted-and-queued-fridge-items",
                     [],
                     function(response){
                         if(typeof response['data'] == 'object'){
-                            this.queued = response['data'];
+                            this.carted = response['data'];
                         }
                         // console.log(response);
                         callback();
@@ -46,7 +46,15 @@ export default class FridgeModel {
     getItems(){
         return this.items;
     }
-    getQueued(){
-        return this.queued;
+    getCarted(){
+        return this.carted;
+    }
+    hasQueued(){
+        for(let i in this.carted){
+            if(this.carted[i].queued){
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -209,7 +209,7 @@ export class ControlMenu extends React.Component {
 
     addSelectedItemToCart(id){
         this.props.update({
-            action: 'add-items-to-chart',
+            action: 'add-items-to-cart',
             data: {
                 id: id
             }
