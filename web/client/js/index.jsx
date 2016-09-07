@@ -121,7 +121,7 @@ function init() {
                         <div className="nav-wrapper container">
 
                             <a className={"right " + (this.model.hasQueued() ? "waves-effect waves-light" : "disabled") + " btn-floating btn-large yellow small-margin"}
-                                onClick={this.buyQueuedItems.bind(this)}>
+                                onClick={this.model.hasQueued() ? this.buyQueuedItems.bind(this) : () => {}}>
                                 <i className="material-icons">monetization_on</i>
                             </a>
 
