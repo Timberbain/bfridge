@@ -133,10 +133,14 @@
         while($row = $result->fetch_assoc()){
             $hids[] = $row['hid'];
         }
+        $closed = now();
         $hid_str = implode(",", $hids);
-        $query = "UPDATE fridge_items_history where hid in ($hid_str)";
+        $query = "UPDATE fridge_items_history SET closed='$closed' WHERE hid in ($hid_str)";
+
         if(!$connection->query($query)){
             return "Unable to buy queued items";
+        } else {
+            return "Successfully bought items";
         }
     }
 
