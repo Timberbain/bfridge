@@ -122,10 +122,10 @@ function init() {
 
                             <a className={"right " + (this.model.hasQueued() ? "waves-effect waves-light" : "disabled") + " btn-floating btn-large yellow small-margin"}
                                 onClick={this.buyQueuedItems.bind(this)}>
-                                <i className="material-icons">monetization_on</i>
+                                <i className="material-icons">attach_money</i>
                             </a>
 
-                            <a className="center brand-logo" href="#">
+                            <a className="center brand-logo" href="">
                                 <img className="header-icon responsive-img" src="images/bfridge_icon.png" />
                             </a>
                             <a href="#" data-activates="slide-out" className="button-collapse show-on-large">

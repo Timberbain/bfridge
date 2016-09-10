@@ -4,9 +4,9 @@ window.jQuery = require("jquery");
 window.$ = require("jquery");
 
 class Util {
-    static makeButton(icon, color, callback, enabled){
+    static makeButton(icon, color, callback, enabled, isRound = true){
         return (
-        <a className={"menu-button btn-floating btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : (()=>{})}>
+        <a className={"menu-button " + (isRound ? "btn-floating" : "") +" btn-large " + color + " center " + (enabled ? "waves-effect waves-light" : "disabled")} onClick={ enabled ? callback : (()=>{})}>
             <i className="material-icons">{icon}</i>
         </a>
         )
@@ -230,14 +230,26 @@ export class ControlMenu extends React.Component {
         return (
             <ul id="slide-out" className="side-nav" style={{transform: 'translateX(-100%)'}}>
                 <li>
-                    <div className="center blue-text lighten-1">
-                        <h5>Menu</h5>
-                        <div className="close-nav blue lighten-1 white-text" onClick={function(){$('.button-collapse').sideNav('hide');}}>
-                          <i className="material-icons">keyboard_arrow_left</i>
+                    <div className="center blue white-text lighten-1">
+                        <div className="menuHeaderIcons">
+                            <i className="material-icons small">visibility</i>
                         </div>
                     </div>
                 </li>
-                <li className="alt_divider center"></li>
+                <li>
+                    <ModeMenu></ModeMenu>
+                </li>
+                <li>
+                    <div className="center blue white-text lighten-1">
+                        <div className="menuHeaderIcons">
+                            <i className="material-icons small">border_color</i>
+                        </div>
+
+                        <div className="close-nav blue lighten-1 white-text" onClick={function(){$('.button-collapse').sideNav('hide');}}>
+                            <i className="material-icons">keyboard_arrow_left</i>
+                        </div>
+                    </div>
+                </li>
                 <li>
                     <div className="container center blue-text lighten-1">
                         Add Item
@@ -256,6 +268,22 @@ export class ControlMenu extends React.Component {
                         createItem={this.createItem.bind(this)} />
                 </li>
             </ul>
+        )
+    }
+}
+
+
+export class ModeMenu extends React.Component {
+    render(){
+        return(
+            <div className="row">
+                <div className="col s11">
+                    <ul className="tabs blue-text lighten-1">
+                        <li className="tab col s5"><a href="#shop_tab blue-text lighten-1">Shop</a></li>
+                        <li className="tab col s5"><a href="#fridge_tab blue-text lighten-1">Fridge</a></li>
+                    </ul>
+                </div>
+            </div>
         )
     }
 }

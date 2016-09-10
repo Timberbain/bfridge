@@ -3,11 +3,17 @@ window.$ = require("jquery");
 
 import DataAccess from "./dataAccess"
 
+const ViewMode = {
+    store : 0,
+    fridge : 1
+}
+
 export default class FridgeModel {
     constructor(url){
         this.dataAccess = new DataAccess(url);
         this.carted = [];
         this.items = [];
+        this.viewMode = ViewMode.store;
     }
 
     update ( callback ){
@@ -54,6 +60,22 @@ export default class FridgeModel {
             if(this.carted[i].queued){
                 return true;
             }
+        }
+        return false;
+    }
+
+    getMode(){
+        return this.viewMode;
+    }
+    setMode(mode){
+        if(this.isValidMode(mode)){
+            this.viewMode = mode;
+        }
+    }
+    isValidMode(mode){
+        for(let i in ViewMode){
+            if(ViewMode[i] == mode)
+                return true;
         }
         return false;
     }
